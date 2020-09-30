@@ -62,7 +62,10 @@ class Login extends CI_Controller {
 				redirect(base_url('dashboard'));
 
 			}else{
-				echo "Login Gagal";
+				$this->session->set_flashdata('aktivasi_dulu', '<div class="alert alert-warning" role="alert">Silahkan melakukan aktivasi terlebih dahulu melalui akun email. </div>');
+				$this->load->view('front/v_header');
+				$this->load->view('front/v_login');
+				$this->load->view('front/v_footer');
 			}
 		}else{
 
@@ -108,10 +111,10 @@ class Login extends CI_Controller {
 
 			// echo "Data berhasil masuk";
 
-			$nama_lengkap = $this->input->post('nama_lengkap');
+			$nama_lengkap = htmlspecialchars($this->input->post('nama_lengkap','true'));
 			$password =  $this->input->post('password');
-			$email =  $this->input->post('email');
-			$username =  $this->input->post('username');
+			$email =  htmlspecialchars($this->input->post('email','true'));
+			$username =  htmlspecialchars($this->input->post('username','true'));
 			$sebagai=  $this->input->post('sebagai'); // user/admin/relawan
 			$kategori_difabel =  $this->input->post('kategori_difabel');
 			$difabelornot =  $this->input->post('difabelornot');
@@ -123,17 +126,23 @@ class Login extends CI_Controller {
 				'pengguna_email' => $email,
 				'pengguna_username' => $username,
 				'pengguna_level'=> $sebagai,
-				'pengguna_status' => 1,
+				'pengguna_status' => 0,
 				'pengguna_kategori' => $kategori_difabel,
 				'pengguna_difabelornot' => $difabelornot,
 				'pengguna_jk' => $jk
 
 			);
 
-			// var_dump($data); die();
+
 
 			//insert data user ke db
-			$this->m_data->insert_data($data, 'pengguna');
+			// $this->m_data->insert_data($data, 'pengguna');
+
+
+			//kirim email ke user
+			$this->_sendEmail();
+
+			$this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Selamat pendaftaran akun anda sukses! Silahkan Login. </div>');
 
 			redirect('login');
 		}
@@ -141,5 +150,40 @@ class Login extends CI_Controller {
 
 	}
 
+
+	// Email verifikasi
+	private function _sendEmail()
+	{
+		$config = [
+			'protokol'	=> 'smtp',
+			'smtp_host' => 'ssl://smtp.googlemail.com',
+			'smtp_user' => 'sobatdifabel99@gmail.com',
+			'smtp_pass' => '7654321@',
+			'smtp_port' => 465,
+			'mailtype'  => 'html',
+			'charset'	=> 'utf-8',
+			'newline'   => "\r\n" 
+
+		];
+
+		$this->load->library('email', $config);
+		$this->email->initialize($config);
+
+		$this->email->from('sobatdifabel99@gmail.com','SobatDifabel.com');
+
+		$this->email->to('ekkys99@gmail.com');
+
+		$this->email->subject('Testing');
+
+		$this->email->message('Hello World, Email is work');
+
+		if($this->email->send()){
+			return true;
+		}else{
+			$this->email->print_debugger();
+			die();
+		}
+
+	}
 
 }

@@ -7,9 +7,13 @@
 			<!-- Section header -->
 			<div class="section-header text-center">
 				<h2 class="title">Login</h2>
+				<span><?php echo $this->session->flashdata('message'); ?></span>
+				<span><?php echo $this->session->flashdata('aktivasi_dulu'); ?></span>
+				
 			</div>
 			<!-- /Section header -->
 			<div class=" col-md-3" >
+
 			</div>
 
 			<div class=" col-md-6">
