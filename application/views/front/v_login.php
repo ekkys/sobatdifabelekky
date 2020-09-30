@@ -13,7 +13,7 @@
 			</div>
 
 			<div class=" col-md-6">
-			<form style="border: solid 1px; padding: 50px;  border-radius: 5px;" action="<?php echo base_url('login/aksi'); ?>"  method="post">
+			<form style="border: solid 1px; padding: 50px;  border-radius: 5px;" action="<?php echo base_url('login/login_aksi'); ?>"  method="post">
 				<fieldset class="form-group">
 					<label for="exampleInputEmail1">Username</label>
 					<input type="text" class="form-control" id="exampleInputEmail1" placeholder="Username" name="username">

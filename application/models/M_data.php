@@ -33,6 +33,11 @@ class M_data extends CI_Model {
 	{
 		$this->db->delete($table, $where);
 	}
+
+
+	//Registrasi dan Verifikasi Akun
+
+	
 }
 
 /* End of file m_data.php */
