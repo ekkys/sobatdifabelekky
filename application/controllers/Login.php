@@ -109,11 +109,11 @@ class Login extends CI_Controller {
 
 		}else{
 
-			// echo "Data berhasil masuk";
+			$email = $this->input->post('email','true');
 
 			$nama_lengkap = htmlspecialchars($this->input->post('nama_lengkap','true'));
 			$password =  $this->input->post('password');
-			$email =  htmlspecialchars($this->input->post('email','true'));
+			$email =  htmlspecialchars($email);
 			$username =  htmlspecialchars($this->input->post('username','true'));
 			$sebagai=  $this->input->post('sebagai'); // user/admin/relawan
 			$kategori_difabel =  $this->input->post('kategori_difabel');
@@ -133,14 +133,21 @@ class Login extends CI_Controller {
 
 			);
 
+			// siapkan token 
 
+			$token = base64_encode(random_bytes(32));
+			$user_token = [
+				'token_email' => $email,
+				'token' => $token,
+				'date_created' => time()
+			];
 
 			//insert data user ke db
-			// $this->m_data->insert_data($data, 'pengguna');
-
+			$this->m_data->insert_data($data, 'pengguna');
+			$this->m_data->insert_data($user_token, 'token');
 
 			//kirim email ke user
-			$this->_sendEmail();
+			$this->_sendEmail($token, 'verify');
 
 			$this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Selamat pendaftaran akun anda sukses! Silahkan Login. </div>');
 
@@ -152,9 +159,9 @@ class Login extends CI_Controller {
 
 
 	// Email verifikasi
-	private function _sendEmail()
+	private function _sendEmail($token, $type)
 	{
-		$config = [
+		$config = [  
 			'protokol'	=> 'smtp',
 			'smtp_host' => 'ssl://smtp.googlemail.com',
 			'smtp_user' => 'sobatdifabel99@gmail.com',
@@ -168,14 +175,14 @@ class Login extends CI_Controller {
 
 		$this->load->library('email', $config);
 		$this->email->initialize($config);
-
 		$this->email->from('sobatdifabel99@gmail.com','SobatDifabel.com');
+		$this->email->to($this->input->post('email'));
 
-		$this->email->to('ekkys99@gmail.com');
-
-		$this->email->subject('Testing');
-
-		$this->email->message('Hello World, Email is work');
+		if ($type = 'verify') {
+			$this->email->subject('verifikasi akun');
+			$this->email->message('Klik link berikut untuk verifikasi akun : <a href="'.base_url().'login/verify?email='.$this->input->post('email').'&token='.urlencode($token).'">Activate</a>');
+		}
+		
 
 		if($this->email->send()){
 			return true;
