@@ -83,7 +83,7 @@
 							</ul
 						</li>
 						<li><a href="#contact">Contact</a></li>
-						<li class="has-dropdown"><a href="<?php echo base_url('home/register') ?>"><b>Sign Up</b></a>
+						<li class="has-dropdown"><a href="<?php echo base_url('login/register') ?>"><b>Sign Up</b></a>
 							<ul class="dropdown">
 								<li><a href="<?php echo base_url('login');?>">Login</a></li>
 								<li><a href="<?php echo base_url('login/register');?>">Register</a></li>

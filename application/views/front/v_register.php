@@ -17,25 +17,25 @@
 
 					<fieldset class="form-group">
 						<label for="exampleInputEmail1">Nama lengkap sesuai KTP</label>
-						<input type="text" class="form-control" id="exampleInputEmail1" placeholder="Nama Lengkap" name="nama_lengkap">
+						<input type="text" class="form-control" placeholder="Nama Lengkap" name="nama_lengkap">
 					</fieldset>
 					
 					<fieldset class="form-group">
 						<label for="exampleInputEmail1">Alamat Email</label>
-						<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email" name="email">
+						<input type="email" class="form-control" placeholder="Email" name="email">
 						<small class="text-muted">Kami idak akan pernah membagikan email Anda dengan orang lain.</small>
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="exampleInputEmail1">Username</label>
-						<input type="text" class="form-control" id="exampleInputEmail1" placeholder="Username" name="username">
+						<input type="text" class="form-control" placeholder="Username" name="username">
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="exampleInputPassword1">Password</label>
-						<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password">
+						<input type="password" class="form-control"  placeholder="Password" name="password">
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="exampleInputPassword1">Ulangi Password</label>
-						<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="ulangi_password">
+						<input type="password" class="form-control"  placeholder="Password" name="ulangi_password">
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="exampleSelect1">Jenis Kelamin</label>

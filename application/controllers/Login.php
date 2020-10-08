@@ -88,9 +88,7 @@ class Login extends CI_Controller {
 
 	public function register_aksi()
 	{
-
 		//validasi
-
 		$this->form_validation->set_rules('nama_lengkap', 'Nama_lengkap', 'required|trim' );
 		$this->form_validation->set_rules('email', 'Email', 'required|valid_email');
 		$this->form_validation->set_rules('username', 'Username', 'required|trim');
@@ -134,22 +132,27 @@ class Login extends CI_Controller {
 			);
 
 			// siapkan token 
-
 			$token = base64_encode(random_bytes(32));
 			$user_token = [
 				'token_email' => $email,
-				'token' => $token,
+				'token_pengguna' => $token,
 				'date_created' => time()
 			];
 
+
+
 			//insert data user ke db
 			$this->m_data->insert_data($data, 'pengguna');
+			
+
+			//insert token
 			$this->m_data->insert_data($user_token, 'token');
+			
 
 			//kirim email ke user
-			$this->_sendEmail($token, 'verify');
+			$this->_sendEmail($token, 'verifikasi');
 
-			$this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Selamat pendaftaran akun anda sukses! Silahkan Login. </div>');
+			$this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Selamat pendaftaran akun anda sukses! Silahkan cek inbox email yang anda daftarkan untuk melakukan aktivasi akun. Bila tidak ada silahkan cek di spam. </div>');
 
 			redirect('login');
 		}
@@ -157,8 +160,6 @@ class Login extends CI_Controller {
 
 	}
 
-
-	// Email verifikasi
 	private function _sendEmail($token, $type)
 	{
 		$config = [  
@@ -166,31 +167,88 @@ class Login extends CI_Controller {
 			'smtp_host' => 'ssl://smtp.googlemail.com',
 			'smtp_user' => 'sobatdifabel99@gmail.com',
 			'smtp_pass' => '7654321@',
-			'smtp_port' => 465,
+			'smtp_port' => 587,
 			'mailtype'  => 'html',
 			'charset'	=> 'utf-8',
-			'newline'   => "\r\n" 
-
+			'newline'   => "\r\n" ,
+			
 		];
 
-		$this->load->library('email', $config);
+		$this->load->library('email',$config);
 		$this->email->initialize($config);
-		$this->email->from('sobatdifabel99@gmail.com','SobatDifabel.com');
-		$this->email->to($this->input->post('email'));
 
-		if ($type = 'verify') {
-			$this->email->subject('verifikasi akun');
-			$this->email->message('Klik link berikut untuk verifikasi akun : <a href="'.base_url().'login/verify?email='.$this->input->post('email').'&token='.urlencode($token).'">Activate</a>');
+		$this->email->from('sobatdifabel99@gmail.com', 'SobatDifabel.com');
+		$this->email->to($this->input->post('email'));
+		if ($type == 'verifikasi') {
+			$this->email->subject('Verivikasi Akun');
+			$this->email->message('Klik link berikut untuk memverifikasi akun anda: <a href="'.base_url().'login/verifikasi?email='.$this->input->post('email').'&token='.$token.'">Aktivasi</a>');
 		}
 		
-
-		if($this->email->send()){
+		if ($this->email->send()) {
 			return true;
 		}else{
-			$this->email->print_debugger();
+			echo $this->email->print_debugger();
 			die();
 		}
+	}
 
+	public function verifikasi()
+	{
+		//ambil email dan token dari link aktivasi
+		$email = $this->input->get('email');
+		$token = $this->input->get('token');
+
+		//cek email dan token ada/tidak di db
+		$user_email = $this->db->get_where('pengguna',['pengguna_email' => $email])->row_array();
+
+		if ($user_email) {
+			//jika email benar
+
+			$user_token = $this->db->get_where('token',['token_pengguna'=> $token])->row_array();
+			if ($user_token) {
+				//jika token benar
+				if (time() - $user_token['date_created'] < (60*60*24)) {
+					
+					#update pengguna status = 1
+					$this->db->set('pengguna_status',1);
+					$this->db->where('pengguna_email',$email);
+					$this->db->update('pengguna');
+
+					#hapus token
+					$this->db->delete('token',['token_email'=>$email]);
+
+					//Alihkan kehalaman login
+					$this->session->set_flashdata('aktivasi_dulu', '<div class="alert alert-success" role="alert">'.$email.' sudah diaktivasi silahkan login.</div>');
+					$this->load->view('front/v_header');
+					$this->load->view('front/v_login');
+					$this->load->view('front/v_footer');
+				}else{
+
+					$this->db->delete('pengguna',['pengguna_email'=>$email]);
+					$this->db->delete('token',['token_email'=>$email]);
+
+				//jika token kedaluwarsa sudah lebih dari 24 jam
+					$this->session->set_flashdata('aktivasi_dulu', '<div class="alert alert-danger" role="alert">Aktivasi gagal! Token kedaluwarsa. </div>');
+					$this->load->view('front/v_header');
+					$this->load->view('front/v_login');
+					$this->load->view('front/v_footer');
+				}
+
+			}else{
+				//jika token salah
+				$this->session->set_flashdata('aktivasi_dulu', '<div class="alert alert-danger" role="alert">Aktivasi gagal! Token tidak valid. </div>');
+				$this->load->view('front/v_header');
+				$this->load->view('front/v_login');
+				$this->load->view('front/v_footer');
+			}
+
+		}else{
+			// jika email salah
+			$this->session->set_flashdata('aktivasi_dulu', '<div class="alert alert-danger" role="alert">Aktivasi gagal! Email salah. </div>');
+			$this->load->view('front/v_header');
+			$this->load->view('front/v_login');
+			$this->load->view('front/v_footer');
+		}
 	}
 
 }
